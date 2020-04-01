@@ -27,6 +27,7 @@ class App extends Component {
     }
   }
 
+  /* To check dimensions of image */
   checkSize = () => {
     var myImg = document.createElement("img");
     myImg.src = this.state.src;
@@ -44,6 +45,7 @@ class App extends Component {
     })
   }
 
+  /* Check extension */
   checkExt = (imgUrl) => {
     var extArr = ['jpg','svg','png'];
     var ext =imgUrl.split('.').pop();
@@ -69,6 +71,7 @@ class App extends Component {
 
   }
 
+  /* Getting selected file from filelist */
   onFileSelect = (e) =>{
     var file = e.target.files;
     if( file && file.length > 0 ){
@@ -79,6 +82,64 @@ class App extends Component {
         this.checkSize();        //console.log(this.state.src);
       });
     }
+  }
+
+  onImageLoaded = (image) => {
+    this.imageRef = image ;
+  }
+
+  onCropComplete = (crop) => {
+    this.performCrop(crop);
+  };
+
+  onCropChange = (crop, percentCrop) => {
+    this.setState({ crop });
+  };
+
+  async performCrop(crop) {
+    if (this.imageRef && crop.width && crop.height) {
+      const croppedImgUrl = await this.getCroppedImg(
+        this.imageRef,
+        crop,
+        "newFile.jpeg"
+      );
+      this.setState({ croppedImgUrl });
+    }
+  }
+
+  getCroppedImg(image, crop, fileName) {
+    const canvas = document.createElement("canvas");
+    const scaleX = image.naturalWidth / image.width;
+    const scaleY = image.naturalHeight / image.height;
+    canvas.width = crop.width;
+    canvas.height = crop.height;
+    const ctx = canvas.getContext("2d");
+
+    ctx.drawImage(
+      image,
+      crop.x * scaleX,
+      crop.y * scaleY,
+      crop.width * scaleX,
+      crop.height * scaleY,
+      0,
+      0,
+      crop.width,
+      crop.height
+    );
+
+    return new Promise((resolve, reject) => {
+      canvas.toBlob(blob => {
+        if (!blob) {
+          //reject(new Error('Canvas is empty'));
+          console.error("Canvas is empty");
+          return;
+        }
+        blob.name = fileName;
+        window.URL.revokeObjectURL(this.fileUrl);
+        this.fileUrl = window.URL.createObjectURL(blob);
+        resolve(this.fileUrl);
+      }, "image/jpeg");
+    });
   }
 
   
@@ -100,8 +161,7 @@ class App extends Component {
         <InputFile
           onFileSelect={ this.onFileSelect }
         />
-        { 
-          isImgValidSize  &&
+        {isImgValidSize  && (
           <div>
             <ReactCrop
               src={src}
@@ -112,7 +172,12 @@ class App extends Component {
               onChange={this.onCropChange}
             />
           </div>
-        }
+        )}
+        {croppedImgUrl && (
+          <div>
+            <img alt="Crop" style={{ maxWidth: "100%" }} src={croppedImgUrl} />
+          </div>
+        )}
 
       </div>
     )
