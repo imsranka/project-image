@@ -1,8 +1,10 @@
 import React from 'react';
 
-const InputFile = () => {
+const InputFile = ({ onFileSelect }) => {
     return(
-        
+        <div>
+            <input className='file' id='imgfile' type='file' accept='image/*'  onChange={onFileSelect} />
+        </div>
     )
 }
 

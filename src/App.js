@@ -1,30 +1,42 @@
 import React, { Component } from 'react';
-import InputURL from './components/InputURL/InputURL';
-//import InputFile from './components/InputFile/InputFile';
+import ReactCrop from 'react-image-crop';
+import 'react-image-crop/dist/ReactCrop.css';
+//import InputURL from './components/InputURL/InputURL';
+import InputFile from './components/InputFile/InputFile';
 //import logo from './logo.svg';
 import './App.css';
 
-const initialState = {
-  uploadType:'',
-  input:''
-};
+// const initialState = {
+//   uploadType:'',
+//   input:''
+// };
 
 class App extends Component {
 
   constructor() {
     super();
-    this.state = initialState;
+    this.state = {
+      src : null,
+      imageRef : React.createRef(),
+      croppedImgUrl:'',
+      isImgValidSize : false,
+      crop :{
+        unit : 'px',
+        aspect : 1/1
+      }
+    }
   }
 
   checkSize = () => {
     var myImg = document.createElement("img");
-    myImg.src = this.state.input;
-    myImg.addEventListener('load', function() {
-      var imgHeight=myImg.height;
-      var imgWidth=myImg.width;
+    myImg.src = this.state.src;
+    myImg.addEventListener('load', () => {
+      var imgHeight = myImg.naturalHeight;
+      var imgWidth = myImg.naturalWidth;
 
       if(imgHeight === 1024 && imgWidth === 1024){
         console.log('success size');
+        this.setState({ isImgValidSize : true });
       } 
       else {
         alert('enter 1024*1024 image');
@@ -57,6 +69,18 @@ class App extends Component {
 
   }
 
+  onFileSelect = (e) =>{
+    var file = e.target.files;
+    if( file && file.length > 0 ){
+      const reader = new FileReader();
+      reader.readAsDataURL(file[0]);
+      reader.addEventListener('load', () => {
+        this.setState({ src: reader.result });
+        this.checkSize();        //console.log(this.state.src);
+      });
+    }
+  }
+
   
 
   onSubmit = () => {
@@ -64,14 +88,32 @@ class App extends Component {
   }
 
   render() {
+    const { isImgValidSize, src, crop, croppedImgUrl } = this.state;
     return(
       <div className="App">
-      
+      {/*
         <InputURL 
         handleInput={this.handleInput}
         onSubmit={this.onSubmit}  
         />
-        <p>{this.state.input}</p>
+      */}
+        <InputFile
+          onFileSelect={ this.onFileSelect }
+        />
+        { 
+          isImgValidSize  &&
+          <div>
+            <ReactCrop
+              src={src}
+              crop={crop}
+              ruleOfThirds
+              onImageLoaded={this.onImageLoaded}
+              onComplete={this.onCropComplete}
+              onChange={this.onCropChange}
+            />
+          </div>
+        }
+
       </div>
     )
   }
