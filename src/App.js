@@ -86,6 +86,7 @@ class App extends Component {
 
   onImageLoaded = (image) => {
     this.imageRef = image ;
+    console.log('image'+ this.imageRef);
   }
 
   onCropComplete = (crop) => {
@@ -94,6 +95,7 @@ class App extends Component {
 
   onCropChange = (crop, percentCrop) => {
     this.setState({ crop });
+    console.log('onCropChange'+crop);
   };
 
   async performCrop(crop) {
@@ -105,6 +107,7 @@ class App extends Component {
       );
       this.setState({ croppedImgUrl });
     }
+    console.log('crop url'+ this.state.croppedImgUrl);
   }
 
   getCroppedImg(image, crop, fileName) {
@@ -138,18 +141,26 @@ class App extends Component {
         window.URL.revokeObjectURL(this.fileUrl);
         this.fileUrl = window.URL.createObjectURL(blob);
         resolve(this.fileUrl);
+        this.setState({ blob:blob });
       }, "image/jpeg");
+      
     });
   }
 
-  
-
-  onSubmit = () => {
-
+  handleUploadClick = (blob) => {
+    //var blob = this.state.blob;
+    fetch('http://localhost:3000/upload',
+    {
+      method : 'POST',
+      body : blob
+    })
+    .then(response => response.json())
+    .then(res=>console.log(res))
+    .thenconsole.log('fetch done')
   }
 
   render() {
-    const { isImgValidSize, src, crop, croppedImgUrl } = this.state;
+    const { isImgValidSize, src, crop, croppedImgUrl, blob } = this.state;
     return(
       <div className="App">
       {/*
@@ -158,11 +169,13 @@ class App extends Component {
         onSubmit={this.onSubmit}  
         />
       */}
-        <InputFile
-          onFileSelect={ this.onFileSelect }
-        />
+        <div className="FileInput">
+          <InputFile
+            onFileSelect={ this.onFileSelect }
+          />
+        </div>
         {isImgValidSize  && (
-          <div>
+          <div className="OrgImg">
             <ReactCrop
               src={src}
               crop={crop}
@@ -174,8 +187,13 @@ class App extends Component {
           </div>
         )}
         {croppedImgUrl && (
-          <div>
-            <img alt="Crop" style={{ maxWidth: "100%" }} src={croppedImgUrl} />
+          <div className="CropImg">
+            <div>
+              <img alt="Crop" style={{ maxWidth: "100%" }} src={croppedImgUrl} />
+            </div>
+            <div>
+              <button onClick={ (blob)=> this.handleUploadClick(blob) }>Upload</button>
+            </div>
           </div>
         )}
 
