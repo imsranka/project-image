@@ -27,6 +27,20 @@ class App extends Component {
     }
   }
 
+  base64StringtoBlob = (base64Str) => {
+    var arr, mime, n, bstr;
+    arr = base64Str.split(",");
+    mime = arr[0].match(/:(.*?);/)[1];
+    bstr = atob(arr[1]);
+    n = bstr.length;
+    var u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+   return new Blob([u8arr], { type: mime });
+   //this.setState({blobImg:blobImgData});
+  };
+
   /* To check dimensions of image */
   checkSize = () => {
     var myImg = document.createElement("img");
@@ -99,6 +113,7 @@ class App extends Component {
   };
 
   async performCrop(crop) {
+    var base64String;
     if (this.imageRef && crop.width && crop.height) {
       const croppedImgUrl = await this.getCroppedImg(
         this.imageRef,
@@ -106,8 +121,18 @@ class App extends Component {
         "newFile.jpeg"
       );
       this.setState({ croppedImgUrl });
+      var fimg = new FileReader();
+      fimg.readAsDataURL(this.state.blob);
+      fimg.onloadend = ()=> {
+        base64String = fimg.result;
+        console.log(base64String);
+        this.setState({base64Str:base64String});
+      };
+
     }
+   
     console.log('crop url'+ this.state.croppedImgUrl);
+    //console.log(this.state.blobImg);
   }
 
   getCroppedImg(image, crop, fileName) {
@@ -143,24 +168,30 @@ class App extends Component {
         resolve(this.fileUrl);
         this.setState({ blob:blob });
       }, "image/jpeg");
-      
     });
   }
+ 
 
-  handleUploadClick = (blob) => {
-    //var blob = this.state.blob;
-    fetch('http://localhost:3000/upload',
+  handleUploadClick = () => {
+    var blobImg = this.base64StringtoBlob(this.state.base64Str);
+    blobImg.name='hello';
+    console.log(blobImg);
+    /*/console.log('handleclick '+ blob);
+    /fetch('http://localhost:3000/upload',
     {
       method : 'POST',
-      body : blob
+      body : blob,
     })
-    .then(response => response.json())
-    .then(res=>console.log(res))
-    .thenconsole.log('fetch done')
+    .then(function(response) {
+      console.log(response.ok);})
+    .then(res=>console.log('this is server response : ' + res))
+    .catch(err=>console.log(err))
+    */
   }
 
+
   render() {
-    const { isImgValidSize, src, crop, croppedImgUrl, blob } = this.state;
+    const { isImgValidSize, src, crop, croppedImgUrl} = this.state;
     return(
       <div className="App">
       {/*
@@ -192,7 +223,7 @@ class App extends Component {
               <img alt="Crop" style={{ maxWidth: "100%" }} src={croppedImgUrl} />
             </div>
             <div>
-              <button onClick={ (blob)=> this.handleUploadClick(blob) }>Upload</button>
+              <button onClick={  this.handleUploadClick }>Upload</button>
             </div>
           </div>
         )}
