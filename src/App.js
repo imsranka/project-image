@@ -155,6 +155,7 @@ class App extends Component {
     .then(response=> {
         var url = document.createElement('a');
         url.href = response.data.imageurl;
+        url.target = "_blank";
         url.innerText = "Check your file"
         swal(response.message,{
           content: url
