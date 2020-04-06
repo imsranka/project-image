@@ -152,7 +152,15 @@ class App extends Component {
       
     })
     .then(res=>res.json())
-    .then(response=>swal(response.message,response.data.imageurl,"success"))
+    .then(response=> {
+        var url = document.createElement('a');
+        url.href = response.data.imageurl;
+        url.innerText = "Check your file"
+        swal(response.message,{
+          content: url
+        })
+      }
+    )
     .catch(err=>console.log(err))
     
   }
