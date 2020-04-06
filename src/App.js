@@ -1,25 +1,21 @@
 import React, { Component } from 'react';
 import ReactCrop from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
+import swal from 'sweetalert'
 //import InputURL from './components/InputURL/InputURL';
 import InputFile from './components/InputFile/InputFile';
-//import logo from './logo.svg';
+import {base64StringtoBlob} from './ReusableUtils'
 import './App.css';
-
-// const initialState = {
-//   uploadType:'',
-//   input:''
-// };
 
 class App extends Component {
 
   constructor() {
     super();
     this.state = {
-      src : null,
+      src : '',
       imageRef : React.createRef(),
       croppedImgUrl:'',
-      isImgValidSize : false,
+      isImgValidSize : '',
       crop :{
         unit : 'px',
         aspect : 1/1
@@ -27,19 +23,7 @@ class App extends Component {
     }
   }
 
-  base64StringtoBlob = (base64Str) => {
-    var arr, mime, n, bstr;
-    arr = base64Str.split(",");
-    mime = arr[0].match(/:(.*?);/)[1];
-    bstr = atob(arr[1]);
-    n = bstr.length;
-    var u8arr = new Uint8Array(n);
-    while (n--) {
-      u8arr[n] = bstr.charCodeAt(n);
-    }
-   return new Blob([u8arr], { type: mime });
-   //this.setState({blobImg:blobImgData});
-  };
+  
 
   /* To check dimensions of image */
   checkSize = () => {
@@ -54,35 +38,13 @@ class App extends Component {
         this.setState({ isImgValidSize : true });
       } 
       else {
-        alert('enter 1024*1024 image');
+        swal("OOPS!!",
+         "Select 1024*1024 Image", 
+         "error",
+         {closeOnClickOutside: true}
+         );
       }
     })
-  }
-
-  /* Check extension */
-  checkExt = (imgUrl) => {
-    var extArr = ['jpg','svg','png'];
-    var ext =imgUrl.split('.').pop();
-    console.log(ext);
-    if(extArr.includes(ext)) {
-      console.log('success');
-      this.checkSize();
-    }
-    else {
-      alert('Unable to retrieve image');
-    }
-  }
-
-  handleInput = (e) => {
-
-     this.setState({input: e.target.value});
-    
-    //this.setState({input: e.clipboardData.getData('text')});
-    console.log(this.state.input);
-    var imgUrl = document.querySelector("#img").value;
-    //this.state.input;
-    this.checkExt(imgUrl);
-
   }
 
   /* Getting selected file from filelist */
@@ -93,8 +55,11 @@ class App extends Component {
       reader.readAsDataURL(file[0]);
       reader.addEventListener('load', () => {
         this.setState({ src: reader.result });
-        this.checkSize();        //console.log(this.state.src);
+        this.checkSize();
       });
+      if( !this.state.isImgValidSize ) {
+        this.setState({ src: null })
+      }        //console.log(this.state.src);
     }
   }
 
@@ -173,20 +138,23 @@ class App extends Component {
  
 
   handleUploadClick = () => {
-    var blobImg = this.base64StringtoBlob(this.state.base64Str);
+    var blobImg = base64StringtoBlob(this.state.base64Str);
     blobImg.name='hello';
     console.log(blobImg);
-    /*/console.log('handleclick '+ blob);
-    /fetch('http://localhost:3000/upload',
+    const formBlob=new FormData();
+    formBlob.append("image",blobImg);
+    console.log(formBlob.get("image"));
+
+    fetch('http://localhost:3000/upload',
     {
       method : 'POST',
-      body : blob,
+      body : formBlob,
+      
     })
-    .then(function(response) {
-      console.log(response.ok);})
+    .then(res=>res.json())
     .then(res=>console.log('this is server response : ' + res))
     .catch(err=>console.log(err))
-    */
+    
   }
 
 
@@ -205,7 +173,7 @@ class App extends Component {
             onFileSelect={ this.onFileSelect }
           />
         </div>
-        {isImgValidSize  && (
+        {isImgValidSize ? (
           <div className="OrgImg">
             <ReactCrop
               src={src}
@@ -216,7 +184,9 @@ class App extends Component {
               onChange={this.onCropChange}
             />
           </div>
-        )}
+        )
+        :null
+        }
         {croppedImgUrl && (
           <div className="CropImg">
             <div>

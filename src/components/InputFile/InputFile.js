@@ -1,9 +1,10 @@
 import React, { useRef } from 'react';
+import './InputFile.css'
 
 const InputFile = ({ onFileSelect }) => {
     var fileInput = useRef();
     return(
-        <div>
+        <div className='container'>
             <input 
             style={{display:'none'}}
             className='file' 
@@ -13,7 +14,7 @@ const InputFile = ({ onFileSelect }) => {
             onChange={onFileSelect} 
             ref={fileIn => fileInput = fileIn}
             />
-            <button onClick={() => { fileInput.click() }}>Select File</button>
+            <button className ='refbtn' onClick={() => { fileInput.click() }}>Select File</button>
         </div>
     )
 }
