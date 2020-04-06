@@ -152,7 +152,7 @@ class App extends Component {
       
     })
     .then(res=>res.json())
-    .then(res=>console.log('this is server response : ' + res))
+    .then(response=>swal(response.message,response.data.imageurl,"success"))
     .catch(err=>console.log(err))
     
   }
@@ -193,7 +193,7 @@ class App extends Component {
               <img alt="Crop" style={{ maxWidth: "100%" }} src={croppedImgUrl} />
             </div>
             <div>
-              <button onClick={  this.handleUploadClick }>Upload</button>
+              <button className='btnUpload' onClick={  this.handleUploadClick }>Upload</button>
             </div>
           </div>
         )}

@@ -6,3 +6,35 @@
   background-color: rgba(43, 165, 137, 0.45);
 }
 
+.OrgImg {
+ margin:auto;
+ width:70%;
+}
+
+.ReactCrop {
+  width:70%;
+  height:auto;
+  margin-left: 100px;;
+}
+
+.CropImg {
+  margin: 20px;
+}
+
+.btnUpload {
+  background-color: palevioletred;
+  border-radius: 5px;
+  border: none;
+  text-align: center;
+  display: inline-block;
+  cursor: pointer;
+  font-size: 20px;
+  color: white;
+  width: 200px;
+  padding: 15px;
+  margin: 20px;
+}
+
+.btnUpload:hover {
+  background-color:tomato;
+}
