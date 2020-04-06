@@ -12,17 +12,19 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      src : '',
+      src : null,
       imageRef : React.createRef(),
       croppedImgUrl:'',
       isImgValidSize : '',
       crop :{
         unit : 'px',
-        aspect : 1/1
+        aspect : 1/1,
+        // height: '50',
+        //width:'50'
       }
     }
   }
-
+  
   
 
   /* To check dimensions of image */
@@ -38,6 +40,7 @@ class App extends Component {
         this.setState({ isImgValidSize : true });
       } 
       else {
+        this.setState({ isImgValidSize : false })
         swal("OOPS!!",
          "Select 1024*1024 Image", 
          "error",
@@ -52,15 +55,20 @@ class App extends Component {
     var file = e.target.files;
     if( file && file.length > 0 ){
       const reader = new FileReader();
-      reader.readAsDataURL(file[0]);
       reader.addEventListener('load', () => {
-        this.setState({ src: reader.result });
-        this.checkSize();
+        setTimeout(() => {
+          this.setState({ src: reader.result });
+          this.checkSize();
+        },1000);
+        
       });
+      reader.readAsDataURL(file[0]);
       if( !this.state.isImgValidSize ) {
         this.setState({ src: null })
-      }        //console.log(this.state.src);
+      }  
+      //console.log(this.state.src);
     }
+   
   }
 
   onImageLoaded = (image) => {
@@ -182,7 +190,8 @@ class App extends Component {
             onFileSelect={ this.onFileSelect }
           />
         </div>
-        {isImgValidSize ? (
+        <div className="box">
+        {isImgValidSize && (
           <div className="OrgImg">
             <ReactCrop
               src={src}
@@ -194,10 +203,10 @@ class App extends Component {
             />
           </div>
         )
-        :null
+        
         }
         {croppedImgUrl && (
-          <div className="CropImg">
+          <div className="CropImg item">
             <div>
               <img alt="Crop" style={{ maxWidth: "100%" }} src={croppedImgUrl} />
             </div>
@@ -206,7 +215,7 @@ class App extends Component {
             </div>
           </div>
         )}
-
+        </div>
       </div>
     )
   }
